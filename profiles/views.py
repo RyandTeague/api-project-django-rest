@@ -3,7 +3,6 @@ from rest_framework import generics, filters
 from drf_api.permissions import IsOwnerOrReadOnly
 from .models import Profile
 from .serializers import ProfileSerializer
-from followers.models import Follower
 
 
 class ProfileList(generics.ListAPIView):
@@ -12,10 +11,9 @@ class ProfileList(generics.ListAPIView):
     No create view as profile creation is handled by django signals.
     """
     queryset = Profile.objects.annotate(
-        posts_count=Count('owner__post', distinct=True),
-        followers_count=Count('owner__followed', distinct=True),
-        following_count=Count('owner__following', distinct=True)
-    ).order_by('-created_at')
+    posts_count=Count('owner__post', distinct=True),
+    followers_count=Count('owner__followed', distinct=True),
+    following_count=Count('owner__follower', distinct=True)).order_by('-created_at')
     serializer_class = ProfileSerializer
     filter_backends = [
         filters.OrderingFilter
@@ -29,14 +27,16 @@ class ProfileList(generics.ListAPIView):
     ]
 
 
+
+
 class ProfileDetail(generics.RetrieveUpdateAPIView):
     """
     Retrieve or update a profile if you're the owner.
     """
     permission_classes = [IsOwnerOrReadOnly]
     queryset = Profile.objects.annotate(
-        posts_count=Count('owner__post', distinct=True),
-        followers_count=Count('owner__followed', distinct=True),
-        following_count=Count('owner__following', distinct=True)
-    ).order_by('-created_at')
+    posts_count=Count('owner__post', distinct=True),
+    followers_count=Count('owner__followed', distinct=True),
+    following_count=Count('owner__follower', distinct=True)).order_by('-created_at')
+
     serializer_class = ProfileSerializer
